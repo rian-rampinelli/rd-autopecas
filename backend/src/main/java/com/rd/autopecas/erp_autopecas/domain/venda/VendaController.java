@@ -2,9 +2,13 @@ package com.rd.autopecas.erp_autopecas.domain.venda;
 
 import com.rd.autopecas.erp_autopecas.domain.venda.dto.VendaRequest;
 import com.rd.autopecas.erp_autopecas.domain.venda.dto.VendaResponse;
+import com.rd.autopecas.erp_autopecas.domain.venda.dto.VendaResumeResponse;
+import com.rd.autopecas.erp_autopecas.domain.venda.filter.VendaFilter;
 import com.rd.autopecas.erp_autopecas.domain.item_venda.dto.ItemVendaRequest;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +26,12 @@ public class VendaController {
     @GetMapping("{id}")
     public ResponseEntity<VendaResponse> findById(@PathVariable Long id){
         return ResponseEntity.ok((vendaService.findById(id)));
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'VENDEDOR')")
+    @GetMapping
+    public ResponseEntity<Page<VendaResumeResponse>> findAll(Pageable pageable, @ModelAttribute @Valid VendaFilter vendaFilter) {
+        return ResponseEntity.ok(vendaService.findAll(pageable,vendaFilter));
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'VENDEDOR')")

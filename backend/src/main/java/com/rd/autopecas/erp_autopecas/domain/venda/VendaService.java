@@ -10,6 +10,8 @@ import com.rd.autopecas.erp_autopecas.domain.estoque_item.EstoqueItem;
 import com.rd.autopecas.erp_autopecas.domain.estoque_item.EstoqueItemRepository;
 import com.rd.autopecas.erp_autopecas.domain.venda.dto.VendaRequest;
 import com.rd.autopecas.erp_autopecas.domain.venda.dto.VendaResponse;
+import com.rd.autopecas.erp_autopecas.domain.venda.dto.VendaResumeResponse;
+import com.rd.autopecas.erp_autopecas.domain.venda.filter.VendaFilter;
 import com.rd.autopecas.erp_autopecas.domain.estoque.Estoque;
 import com.rd.autopecas.erp_autopecas.domain.estoque.EstoqueRepository;
 import com.rd.autopecas.erp_autopecas.domain.estoque.EstoqueService;
@@ -25,10 +27,12 @@ import com.rd.autopecas.erp_autopecas.exceptions.ValidationException;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.List;
+
 
 @Service
 @AllArgsConstructor
@@ -51,12 +55,12 @@ public class VendaService {
         return(VendaResponse.fromEntity(venda));
     }
 
-    public List<VendaResponse> findTodasVendas(){
-        log.info("entrei em findall");
-        return vendaRepository.findAll().stream()
-                .map(venda -> VendaResponse.fromEntity(venda))
-                .toList();
+    public Page<VendaResumeResponse> findAll(Pageable pageable, VendaFilter filter){
+        String status = filter.status() == null ? null : filter.status().toUpperCase();
+        return vendaRepository.findWithFilters(pageable,filter.idFuncionario(),filter.idCliente(),
+                filter.idFormaPagamento(),filter.totalValueMin(),filter.totalValueMax(),status);
     }
+
 
     @Transactional
     public VendaResponse gerarVenda(VendaRequest vendaRequest) {
