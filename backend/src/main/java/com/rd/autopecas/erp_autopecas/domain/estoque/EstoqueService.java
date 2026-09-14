@@ -4,8 +4,8 @@ import com.rd.autopecas.erp_autopecas.domain.Item.Item;
 import com.rd.autopecas.erp_autopecas.domain.Item.ItemRepository;
 import com.rd.autopecas.erp_autopecas.domain.estoque_item.EstoqueItem;
 import com.rd.autopecas.erp_autopecas.domain.estoque_item.EstoqueItemRepository;
-import com.rd.autopecas.erp_autopecas.domain.estoque_item.dto.EstoqueItemRequest;
 import com.rd.autopecas.erp_autopecas.domain.estoque_item.dto.EstoqueItemResponse;
+import com.rd.autopecas.erp_autopecas.domain.item_venda.ItemVenda;
 import com.rd.autopecas.erp_autopecas.domain.movimentacao_estoque.MovimentacaoEstoque;
 import com.rd.autopecas.erp_autopecas.domain.movimentacao_estoque.MovimentacaoEstoqueRepository;
 import com.rd.autopecas.erp_autopecas.domain.movimentacao_estoque.enums.TypeMovimentacao;
@@ -55,14 +55,14 @@ public class EstoqueService {
     }
 
     @Transactional
-    public EstoqueItemResponse registrarSaida(Long idEstoque, EstoqueItemRequest estoqueItemRequest){
-        EstoqueItem estoqueItem = findByIdEstoqueAndItem(idEstoque,estoqueItemRequest.idItem());
+    public EstoqueItemResponse registrarSaida(Estoque estoque, ItemVenda itemVenda){
+        EstoqueItem estoqueItem = findByIdEstoqueAndItem(estoque.getId(), itemVenda.getItem().getId());
         if(estoqueItem == null){
             throw new ResourceNotFoundException("nao existe esse item nesse estoque!");
         }
         //n uso save pois o hibernate ja gerencia com o @Transactional,fazendo um update no final
-        estoqueItem.removerQuantidade(estoqueItemRequest.quantidade());
-        registrarTransacao(estoqueItemRequest.quantidade(),TypeMovimentacao.SAIDA,estoqueItem);
+        estoqueItem.removerQuantidade(itemVenda.getQuantidade());
+        registrarTransacao(itemVenda.getQuantidade(),TypeMovimentacao.SAIDA,estoqueItem);
         return EstoqueItemResponse.fromEntity(estoqueItem);
     }
 

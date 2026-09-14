@@ -31,4 +31,6 @@ public class MovimentacaoEstoque extends Auditable {
     @ManyToOne
     @JoinColumn(name = "id_estoque_item", nullable = false)
     private EstoqueItem estoqueItem;
+
+
 }

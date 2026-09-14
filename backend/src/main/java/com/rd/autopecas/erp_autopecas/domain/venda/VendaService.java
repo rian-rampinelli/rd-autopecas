@@ -112,9 +112,11 @@ public class VendaService {
     }
 
     @Transactional
-    public VendaResponse finalizarVenda(Long idVenda){
+    public VendaResponse finalizarVenda(Long idVenda,Long idEstoque){
         Venda venda = findEntityVenda(idVenda);
+        Estoque estoque = findEntityEstoque(idEstoque);
         verificaTransaçãoPaga(venda);
+        registrarBaixaNoEstoque(venda,estoque);
         venda.setStatus(StatusTransacao.FINALIZADA);
         vendaRepository.save(venda);
         return VendaResponse.fromEntity(venda);
@@ -137,9 +139,7 @@ public class VendaService {
     public VendaResponse registrarEntrega(Long idVenda,Long idEstoque){
         log.info("entrei na entrega");
         Venda venda = findEntityVenda(idVenda);
-        Estoque estoque = findEntityEstoque(idEstoque);
         verificaTransaçãoFinalizada(venda);
-        registrarEntradaNoEstoque(venda,estoque);
         venda.setStatus(StatusTransacao.ENTREGUE);
         vendaRepository.save(venda);
         return VendaResponse.fromEntity(venda);
@@ -173,6 +173,12 @@ public class VendaService {
     private void registrarEntradaNoEstoque(Venda venda,Estoque estoque){
         for(ItemVenda itemVenda : venda.getItemsVenda()){
             estoqueService.registrarEntrada(estoque,itemVenda.getItem().getId(),itemVenda.getQuantidade(),"n sei ainda como");
+        }
+    }
+
+    private void registrarBaixaNoEstoque(Venda venda,Estoque estoque){
+        for(ItemVenda itemVenda : venda.getItemsVenda()){
+            estoqueService.registrarSaida(estoque,itemVenda);
         }
     }
 

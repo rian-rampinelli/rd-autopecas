@@ -31,20 +31,12 @@ public class EstoqueController {
         return ResponseEntity.ok(estoqueBuscaService.findById(id));
     }
 
-
     @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteById(@PathVariable Long id){
         estoqueService.deleteById(id);
         return ResponseEntity.ok().build();
     }
-
-    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'ESTOQUISTA','VENDEDOR')")
-    @PutMapping ("/{idEstoque}/items")
-    public ResponseEntity<EstoqueItemResponse> removerItem(@PathVariable  Long idEstoque,@RequestBody @Valid EstoqueItemRequest estoqueItemRequest) {
-        return ResponseEntity.ok(estoqueService.registrarSaida(idEstoque,estoqueItemRequest));
-    }
-
 
     @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'ESTOQUISTA','VENDEDOR')")
     @GetMapping("/{idEstoque}/movimentacoes")

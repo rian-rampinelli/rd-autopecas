@@ -29,7 +29,8 @@ public class EstoqueItemService {
 
     public Page<EstoqueItemResponse> findAll(Pageable pageable, EstoqueItemFilter filter){
         log.info("entrei no find all");
-        Page<EstoqueItemResponse> estoqueItems =  estoqueItemRepository.findWithFilters(pageable,filter.idEstoque());
+        Page<EstoqueItemResponse> estoqueItems =  estoqueItemRepository.findWithFilters(pageable,filter.idEstoque(),filter.idItem(),filter.nomeItem(),
+                filter.localizacao(),filter.qtdMinima(),filter.qtdMaxima());
         return estoqueItems;
 
     }
