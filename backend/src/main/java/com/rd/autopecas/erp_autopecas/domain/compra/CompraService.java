@@ -5,6 +5,8 @@ import com.rd.autopecas.erp_autopecas.domain.Item.ItemRepository;
 import com.rd.autopecas.erp_autopecas.domain.common.StatusTransacao;
 import com.rd.autopecas.erp_autopecas.domain.compra.dto.CompraRequest;
 import com.rd.autopecas.erp_autopecas.domain.compra.dto.CompraResponse;
+import com.rd.autopecas.erp_autopecas.domain.compra.dto.CompraResumeResponse;
+import com.rd.autopecas.erp_autopecas.domain.compra.filter.CompraFilter;
 import com.rd.autopecas.erp_autopecas.domain.estoque.Estoque;
 import com.rd.autopecas.erp_autopecas.domain.estoque.EstoqueRepository;
 import com.rd.autopecas.erp_autopecas.domain.estoque.EstoqueService;
@@ -22,10 +24,12 @@ import com.rd.autopecas.erp_autopecas.exceptions.ValidationException;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.List;
+
 
 @Service
 @AllArgsConstructor
@@ -45,17 +49,13 @@ public class CompraService {
 
     public CompraResponse findById(Long id){
         Compra compra = findEntityCompra(id);
-        log.info("Quantidade: {}", compra.getItemsCompra().size());
-
-        compra.getItemsCompra()
-                .forEach(item -> log.info("ItemCompra: {}", item.getId()));
         return(CompraResponse.fromEntity(compra));
     }
 
-    public List<CompraResponse> findTodasCompras(){
-        return compraRepository.findAll().stream()
-                .map(compra -> CompraResponse.fromEntity(compra))
-                .toList();
+    public Page<CompraResumeResponse> findAll(Pageable pageable, CompraFilter filter){
+        String status = filter.status() == null ? null : filter.status().toUpperCase();
+        return compraRepository.findWithFilters(pageable,filter.idFuncionario(),filter.idFornecedor(),filter.idEstoque(),
+                filter.idFormaPagamento(),filter.totalValueMin(),filter.totalValueMax(),status);
     }
 
     @Transactional

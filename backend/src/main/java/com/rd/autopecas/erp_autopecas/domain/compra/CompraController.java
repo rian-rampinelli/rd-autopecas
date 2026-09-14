@@ -2,9 +2,13 @@ package com.rd.autopecas.erp_autopecas.domain.compra;
 
 import com.rd.autopecas.erp_autopecas.domain.compra.dto.CompraRequest;
 import com.rd.autopecas.erp_autopecas.domain.compra.dto.CompraResponse;
+import com.rd.autopecas.erp_autopecas.domain.compra.dto.CompraResumeResponse;
+import com.rd.autopecas.erp_autopecas.domain.compra.filter.CompraFilter;
 import com.rd.autopecas.erp_autopecas.domain.item_compra.dto.ItemCompraRequest;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -18,12 +22,20 @@ public class CompraController {
 
     private final CompraService compraService;
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'ESTOQUISTA')")
+    //busca de compras
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'ESTOQUISTA','VENDEDOR')")
     @GetMapping("{id}")
     public ResponseEntity<CompraResponse> findById(@PathVariable Long id){
         return ResponseEntity.ok((compraService.findById(id)));
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'ESTOQUISTA','VENDEDOR')")
+    @GetMapping
+    public ResponseEntity<Page<CompraResumeResponse>> findAll(Pageable pageable, @ModelAttribute @Valid CompraFilter compraFilter) {
+        return ResponseEntity.ok(compraService.findAll(pageable,compraFilter));
+    }
+
+    //fluxo de compras
     @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'ESTOQUISTA')")
     @PostMapping
     public ResponseEntity<CompraResponse> gerarCompra(@RequestBody @Valid CompraRequest compraRequest){
@@ -54,7 +66,7 @@ public class CompraController {
 
     @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'ESTOQUISTA')")
     @PostMapping("{idCompra}/entregar")
-    public ResponseEntity<CompraResponse> CompraEntregue(@PathVariable Long idCompra){
+    public ResponseEntity<CompraResponse> entregarCompra(@PathVariable Long idCompra){
         return ResponseEntity.created(URI.create("/compras")).body(compraService.registrarEntrega(idCompra));
     }
 
