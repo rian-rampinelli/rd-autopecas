@@ -54,7 +54,7 @@ public class CompraService {
 
     public Page<CompraResumeResponse> findAll(Pageable pageable, CompraFilter filter){
         String status = filter.status() == null ? null : filter.status().toUpperCase();
-        return compraRepository.findWithFilters(pageable,filter.idFuncionario(),filter.idFornecedor(),filter.idEstoque(),
+        return compraRepository.findWithFilters(pageable,filter.idFuncionario(),filter.idFornecedor(),
                 filter.idFormaPagamento(),filter.totalValueMin(),filter.totalValueMax(),status);
     }
 

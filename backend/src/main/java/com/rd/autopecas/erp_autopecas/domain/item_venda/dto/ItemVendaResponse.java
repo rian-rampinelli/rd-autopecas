@@ -1,8 +1,6 @@
 package com.rd.autopecas.erp_autopecas.domain.item_venda.dto;
 
 import com.rd.autopecas.erp_autopecas.domain.item_venda.ItemVenda;
-
-
 import java.math.BigDecimal;
 
 public record ItemVendaResponse(
@@ -18,7 +16,7 @@ public record ItemVendaResponse(
     public static ItemVendaResponse fromEntity(ItemVenda itemVenda) {
         return new ItemVendaResponse(
                 itemVenda.getId(),
-                itemVenda.getEstoque().getId(),
+                itemVenda.getEstoque() != null ? itemVenda.getEstoque().getId() : null,
                 itemVenda.getItem().getId(),
                 itemVenda.getVenda().getId(),
                 itemVenda.getQuantidade(),
