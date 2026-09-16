@@ -39,16 +39,4 @@ public class Estoque extends Auditable {
     private List<EstoqueItem> ItemsEstoque = new ArrayList();
 
 
-
-
-    public void addEstoqueItem(EstoqueItem estoqueItem) {
-        ItemsEstoque.add(estoqueItem);
-        estoqueItem.setEstoque(this);
-    }
-
-    public void removeItemEstoque(EstoqueItem estoqueItem) {
-        ItemsEstoque.remove(estoqueItem);
-        estoqueItem.setEstoque(null);
-    }
-
 }

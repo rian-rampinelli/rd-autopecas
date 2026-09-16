@@ -9,7 +9,6 @@ public record CompraResumeResponse(
         Long idFuncionario,
         Long idFornecedor,
         Long idEstoque,
-        Long idFormaPagamento,
         String status,
         BigDecimal totalValue
 

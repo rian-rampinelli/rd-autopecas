@@ -62,12 +62,10 @@ public class CompraService {
     public CompraResponse gerarCompra(CompraRequest compraRequest) {
         Fornecedor fornecedor = findEntityFornecedor(compraRequest.idFornecedor());
         Funcionario funcionario = findEntityFuncionario(compraRequest.idFuncionario());
-        Estoque estoque = findEntityEstoque(compraRequest.idEstoque());
         funcionario.validarAtivo();
         Compra compra = new Compra();
         compra.setFornecedor(fornecedor);
         compra.setFuncionario(funcionario);
-        compra.setEstoque(estoque);
         compra.setStatus(StatusTransacao.EM_ANDAMENTO);
         compraRepository.save(compra);
         return CompraResponse.fromEntity(compra);
@@ -77,13 +75,15 @@ public class CompraService {
     public CompraResponse adicionarItemNaCompra(Long idCompra, ItemCompraRequest request){
         Compra compra = findEntityCompra(idCompra);
         verificaTransaçãoEmAndamento(compra);
-        ItemCompra itemCompra = findEntityItemCompraByItemAndCompra(request.idItem(),idCompra);
+        ItemCompra itemCompra = findEntityItemCompraByItemAndCompraAndEstoque(request.idItem(),idCompra,request.idEstoque());
         if(itemCompra == null){
             itemCompra = new ItemCompra();
             Item item = findEntityItem(request.idItem());
+            Estoque estoque = findEntityEstoque(request.idEstoque());
             itemCompra.setQuantidade(request.quantidade());
             itemCompra.setItemValue(request.itemValue());
             itemCompra.setItem(item);
+            itemCompra.setEstoque(estoque);
             compra.addItemCompra(itemCompra);
         }
         else{
@@ -132,7 +132,7 @@ public class CompraService {
         log.info("entrei na entrega");
         Compra compra = findEntityCompra(idCompra);
         verificaTransaçãoFinalizada(compra);
-        registrarEntradaNoEstoque(compra,compra.getEstoque());
+        registrarEntradaNoEstoque(compra);
         compra.setStatus(StatusTransacao.ENTREGUE);
         compraRepository.save(compra);
         return CompraResponse.fromEntity(compra);
@@ -163,9 +163,9 @@ public class CompraService {
         compra.setTotalValue(totalValue);
     }
 
-    private void registrarEntradaNoEstoque(Compra compra,Estoque estoque){
+    private void registrarEntradaNoEstoque(Compra compra){
         for(ItemCompra itemCompra : compra.getItemsCompra()){
-            estoqueService.registrarEntrada(estoque,itemCompra.getItem().getId(),itemCompra.getQuantidade(),"n sei ainda como");
+            estoqueService.registrarEntrada(itemCompra);
         }
     }
 
@@ -203,8 +203,8 @@ public class CompraService {
                 .orElseThrow(() -> new ResourceNotFoundException("Item não pertence à compra."));
     }
 
-    private ItemCompra findEntityItemCompraByItemAndCompra(Long idItem,Long idCompra){
-        return itemCompraRepository.findByItem_IdAndCompra_Id(idItem, idCompra)
+    private ItemCompra findEntityItemCompraByItemAndCompraAndEstoque(Long idItem,Long idCompra,Long idEstoque){
+        return itemCompraRepository.findByItem_IdAndCompra_IdAndEstoque_Id(idItem, idCompra,idEstoque)
                 .orElse(null);
     }
 

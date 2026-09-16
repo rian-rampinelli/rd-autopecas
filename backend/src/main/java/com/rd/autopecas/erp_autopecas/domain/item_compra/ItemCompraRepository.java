@@ -8,5 +8,5 @@ import java.util.Optional;
 @Repository
 public interface ItemCompraRepository extends JpaRepository<ItemCompra, Long> {
     Optional<ItemCompra> findByIdAndCompra_Id(Long idItemCompra, Long idCompra);
-    Optional<ItemCompra> findByItem_IdAndCompra_Id(Long idItem, Long idCompra);
+    Optional<ItemCompra> findByItem_IdAndCompra_IdAndEstoque_Id(Long idItem, Long idCompra,Long idEstoque);
 }

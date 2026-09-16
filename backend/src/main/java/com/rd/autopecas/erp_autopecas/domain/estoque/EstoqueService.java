@@ -5,6 +5,7 @@ import com.rd.autopecas.erp_autopecas.domain.Item.ItemRepository;
 import com.rd.autopecas.erp_autopecas.domain.estoque_item.EstoqueItem;
 import com.rd.autopecas.erp_autopecas.domain.estoque_item.EstoqueItemRepository;
 import com.rd.autopecas.erp_autopecas.domain.estoque_item.dto.EstoqueItemResponse;
+import com.rd.autopecas.erp_autopecas.domain.item_compra.ItemCompra;
 import com.rd.autopecas.erp_autopecas.domain.item_venda.ItemVenda;
 import com.rd.autopecas.erp_autopecas.domain.movimentacao_estoque.MovimentacaoEstoque;
 import com.rd.autopecas.erp_autopecas.domain.movimentacao_estoque.MovimentacaoEstoqueRepository;
@@ -36,21 +37,21 @@ public class EstoqueService {
     }
 
     @Transactional
-    public EstoqueItemResponse registrarEntrada(Estoque estoque,Long idItem,BigDecimal quantidade ,String localizacao){
-        EstoqueItem estoqueItem = findByIdEstoqueAndItem(estoque.getId(),idItem);
+    public EstoqueItemResponse registrarEntrada(ItemCompra itemCompra){
+        EstoqueItem estoqueItem = findByIdEstoqueAndItem(itemCompra.getEstoque().getId(),itemCompra.getItem().getId());
         if(estoqueItem == null){
-            Item item = findEntityItem(idItem);
+            Item item = findEntityItem(itemCompra.getItem().getId());
             estoqueItem = new EstoqueItem();
-            estoqueItem.setQuantidade(quantidade);
-            estoqueItem.setLocalizacao(localizacao);
-            estoque.addEstoqueItem(estoqueItem);
+            estoqueItem.setQuantidade(itemCompra.getQuantidade());
+            estoqueItem.setLocalizacao(estoqueItem.getLocalizacao());
+            estoqueItem.setEstoque(itemCompra.getEstoque());
             estoqueItem.setItem(item);
         }
         else{
-            estoqueItem.adicionarQuantidade(quantidade);
+            estoqueItem.adicionarQuantidade(itemCompra.getQuantidade());
         }
         estoqueItemRepository.save(estoqueItem);
-        registrarTransacao(quantidade,TypeMovimentacao.ENTRADA,estoqueItem);
+        registrarTransacao(itemCompra.getQuantidade(),TypeMovimentacao.ENTRADA,estoqueItem);
         return EstoqueItemResponse.fromEntity(estoqueItem);
     }
 

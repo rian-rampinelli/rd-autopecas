@@ -5,7 +5,6 @@ import java.math.BigDecimal;
 public record EstoqueItemProjection(
         Long id,
         Long idItem,
-        Long idEstoque,
         String nomeItem,
         BigDecimal quantidade,
         String localizacao

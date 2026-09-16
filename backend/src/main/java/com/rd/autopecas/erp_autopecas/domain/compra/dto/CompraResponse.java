@@ -12,8 +12,6 @@ public record CompraResponse(
         Long id,
         Long idFuncionario,
         Long idFornecedor,
-        Long idEstoque,
-        Long idFormaPagamento,
         StatusTransacao status,
         BigDecimal totalValue,
         List<ItemCompraResponse> itemns
@@ -28,8 +26,6 @@ public record CompraResponse(
                 compra.getId(),
                 compra.getFuncionario().getId(),
                 compra.getFornecedor().getId(),
-                compra.getEstoque().getId(),
-                compra.getFormaPagamento().getId(),
                 compra.getStatus(),
                 compra.getTotalValue(),
                 itemNaCompra

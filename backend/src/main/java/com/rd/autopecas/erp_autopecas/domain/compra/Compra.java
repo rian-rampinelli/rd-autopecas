@@ -43,10 +43,6 @@ public class Compra extends Auditable {
     private Funcionario funcionario;
 
     @ManyToOne
-    @JoinColumn(name = "id_estoque")
-    private Estoque estoque;
-
-    @ManyToOne
     @JoinColumn(name = "id_forma_pagamento")
     private FormaPagamento formaPagamento;
 

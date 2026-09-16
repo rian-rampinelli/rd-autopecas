@@ -9,6 +9,8 @@ public record ItemCompraRequest(
         @NotNull
         Long idItem,
         @NotNull
+        Long idEstoque,
+        @NotNull
         @DecimalMin(value = "0.01")
         BigDecimal quantidade,
         @NotNull
