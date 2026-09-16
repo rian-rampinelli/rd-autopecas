@@ -8,6 +8,7 @@ import com.rd.autopecas.erp_autopecas.domain.common.StatusTransacao;
 
 import com.rd.autopecas.erp_autopecas.domain.estoque_item.EstoqueItem;
 import com.rd.autopecas.erp_autopecas.domain.estoque_item.EstoqueItemRepository;
+import com.rd.autopecas.erp_autopecas.domain.item_venda.dto.ItemVendaRemoveRequest;
 import com.rd.autopecas.erp_autopecas.domain.venda.dto.VendaRequest;
 import com.rd.autopecas.erp_autopecas.domain.venda.dto.VendaResponse;
 import com.rd.autopecas.erp_autopecas.domain.venda.dto.VendaResumeResponse;
@@ -78,7 +79,6 @@ public class VendaService {
 
     @Transactional
     public VendaResponse adicionarItemNaVenda(Long idVenda, ItemVendaRequest request){
-        log.info("entrei em add item venda");
         Venda venda = findEntityVenda(idVenda);
         Estoque estoque = findEntityEstoque(request.idEstoque());
         verificaTransaçãoEmAndamento(venda);
@@ -105,29 +105,30 @@ public class VendaService {
     }
 
     @Transactional
-    public VendaResponse removerItemDaVenda(Long idVenda,Long idItemVenda){
+    public VendaResponse removerItemDaVenda(Long idVenda, ItemVendaRemoveRequest itemVendaRemoveRequest){
         Venda venda = findEntityVenda(idVenda);
         verificaTransaçãoEmAndamento(venda);
-        ItemVenda itemVenda = findEntityItemVendaInVenda(idItemVenda,idVenda);
-        venda.removeItemVenda(itemVenda);
+        ItemVenda itemVenda = findEntityItemVendaInVenda(itemVendaRemoveRequest.id(),idVenda);
+        venda.diminuirQuantidade(itemVendaRemoveRequest.quantidade(),itemVenda);
         recalcularTotal(venda);
         vendaRepository.save(venda);
         return VendaResponse.fromEntity(venda);
     }
 
-    @Transactional
-    public VendaResponse finalizarVenda(Long idVenda,Long idEstoque){
+    public VendaResponse registrarAbandono(Long idVenda){
+        log.info("entrei na abandono");
         Venda venda = findEntityVenda(idVenda);
-        Estoque estoque = findEntityEstoque(idEstoque);
-        verificaTransaçãoPaga(venda);
-        registrarBaixaNoEstoque(venda,estoque);
-        venda.setStatus(StatusTransacao.FINALIZADA);
+        verificaTransaçãoEmAndamento(venda);
+        venda.setStatus(StatusTransacao.ABANDONADA);
         vendaRepository.save(venda);
         return VendaResponse.fromEntity(venda);
     }
 
+
+
     @Transactional
     public VendaResponse processarPagamento(Long idVenda,Long idFormaDePagamento){
+        log.info("entrei aq pelo menos");
         Venda venda = findEntityVenda(idVenda);
         FormaPagamento formaPagamento = findEntityFormaPagamento(idFormaDePagamento);
         verificaTransaçãoEmAndamento(venda);
@@ -140,7 +141,19 @@ public class VendaService {
     }
 
     @Transactional
-    public VendaResponse registrarEntrega(Long idVenda,Long idEstoque){
+    public VendaResponse finalizarVenda(Long idVenda){
+        Venda venda = findEntityVenda(idVenda);
+        verificaTransaçãoPaga(venda);
+        registrarBaixaNoEstoque(venda);
+        venda.setStatus(StatusTransacao.FINALIZADA);
+        vendaRepository.save(venda);
+        return VendaResponse.fromEntity(venda);
+    }
+
+
+
+    @Transactional
+    public VendaResponse registrarEntrega(Long idVenda){
         log.info("entrei na entrega");
         Venda venda = findEntityVenda(idVenda);
         verificaTransaçãoFinalizada(venda);
@@ -158,35 +171,16 @@ public class VendaService {
     }
 
 
-    public VendaResponse registrarAbandono(Long idVenda){
-        log.info("entrei na abandono");
-        Venda venda = findEntityVenda(idVenda);
-        verificaTransaçãoEmAndamento(venda);
-        venda.setStatus(StatusTransacao.ABANDONADA);
-        vendaRepository.save(venda);
-        return VendaResponse.fromEntity(venda);
-    }
-
-
-
     private void recalcularTotal(Venda venda){
         BigDecimal totalValue = venda.calcularTotal();
         venda.setTotalValue(totalValue);
     }
 
-    private void registrarEntradaNoEstoque(Venda venda,Estoque estoque){
+    private void registrarBaixaNoEstoque(Venda venda){
         for(ItemVenda itemVenda : venda.getItemsVenda()){
-            estoqueService.registrarEntrada(estoque,itemVenda.getItem().getId(),itemVenda.getQuantidade(),"n sei ainda como");
+            estoqueService.registrarSaida(itemVenda);
         }
     }
-
-    private void registrarBaixaNoEstoque(Venda venda,Estoque estoque){
-        for(ItemVenda itemVenda : venda.getItemsVenda()){
-            estoqueService.registrarSaida(estoque,itemVenda);
-        }
-    }
-
-
 
 
     //helpers

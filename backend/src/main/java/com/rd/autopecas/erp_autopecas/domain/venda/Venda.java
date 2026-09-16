@@ -7,6 +7,7 @@ import com.rd.autopecas.erp_autopecas.domain.forma_pagamento.FormaPagamento;
 import com.rd.autopecas.erp_autopecas.domain.funcionario.Funcionario;
 import com.rd.autopecas.erp_autopecas.domain.item_compra.ItemCompra;
 import com.rd.autopecas.erp_autopecas.domain.item_venda.ItemVenda;
+import com.rd.autopecas.erp_autopecas.exceptions.ValidationException;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -69,5 +70,15 @@ public class Venda extends Auditable {
         }
         setTotalValue(totalValue);
         return totalValue;
+    }
+
+    public void diminuirQuantidade(BigDecimal qtd,ItemVenda itemVenda){
+        if(itemVenda.getQuantidade().compareTo(qtd) >0){
+            itemVenda.setQuantidade(itemVenda.getQuantidade().subtract(qtd));
+        }
+        else {
+            throw new ValidationException("quantidade não existe para ser tirada");
+        }
+
     }
 }
