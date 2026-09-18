@@ -58,6 +58,7 @@ public class EstoqueService {
     @Transactional
     public EstoqueItemResponse registrarSaida(ItemVenda itemVenda){
         EstoqueItem estoqueItem = findByIdEstoqueAndItem(itemVenda.getEstoque().getId(), itemVenda.getItem().getId());
+
         if(estoqueItem == null){
             throw new ResourceNotFoundException("nao existe esse item nesse estoque!");
         }

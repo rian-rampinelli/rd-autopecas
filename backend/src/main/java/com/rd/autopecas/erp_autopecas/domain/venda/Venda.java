@@ -68,17 +68,12 @@ public class Venda extends Auditable {
             totalValue = totalValue.add(itemVenda.getQuantidade().multiply(itemVenda.getItemValue())
             );
         }
+        if(totalValue.compareTo(BigDecimal.ZERO) < 0){
+            throw new ValidationException("total n pode ser menor q zero");
+        }
         setTotalValue(totalValue);
         return totalValue;
     }
 
-    public void diminuirQuantidade(BigDecimal qtd,ItemVenda itemVenda){
-        if(itemVenda.getQuantidade().compareTo(qtd) >0){
-            itemVenda.setQuantidade(itemVenda.getQuantidade().subtract(qtd));
-        }
-        else {
-            throw new ValidationException("quantidade não existe para ser tirada");
-        }
 
-    }
 }

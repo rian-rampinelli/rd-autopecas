@@ -98,18 +98,25 @@ public class VendaService {
             itemVenda.setQuantidade(itemVenda.getQuantidade().add(request.quantidade()));
         }
 
+
+
         recalcularTotal(venda);
         itemVendaRepository.save(itemVenda);
         vendaRepository.save(venda);
         return VendaResponse.fromEntity(venda);
     }
 
+
+
     @Transactional
     public VendaResponse removerItemDaVenda(Long idVenda, ItemVendaRemoveRequest itemVendaRemoveRequest){
         Venda venda = findEntityVenda(idVenda);
         verificaTransaçãoEmAndamento(venda);
         ItemVenda itemVenda = findEntityItemVendaInVenda(itemVendaRemoveRequest.id(),idVenda);
-        venda.diminuirQuantidade(itemVendaRemoveRequest.quantidade(),itemVenda);
+        itemVenda.diminuirQuantidade(itemVendaRemoveRequest.quantidade(),itemVenda);
+        if(itemVenda.getQuantidade().compareTo(BigDecimal.ZERO) == 0){
+            itemVendaRepository.delete(itemVenda);
+        }
         recalcularTotal(venda);
         vendaRepository.save(venda);
         return VendaResponse.fromEntity(venda);
@@ -128,16 +135,24 @@ public class VendaService {
 
     @Transactional
     public VendaResponse processarPagamento(Long idVenda,Long idFormaDePagamento){
-        log.info("entrei aq pelo menos");
+        log.info("entrei em processar pagamento pelo menos");
         Venda venda = findEntityVenda(idVenda);
         FormaPagamento formaPagamento = findEntityFormaPagamento(idFormaDePagamento);
         verificaTransaçãoEmAndamento(venda);
         venda.setStatus(StatusTransacao.AGUARDANDO_PAGAMENTO);
+        verificaQuantidadeDeItensVendaEmVenda(venda);
         log.info("pagamento foi aprovado");
         venda.setStatus(StatusTransacao.PAGA);
         venda.setFormaPagamento(formaPagamento);
         vendaRepository.save(venda);
         return VendaResponse.fromEntity(venda);
+    }
+
+    public void verificaQuantidadeDeItensVendaEmVenda(Venda venda){
+        for(ItemVenda itemVenda : venda.getItemsVenda()){
+            verificaQuantidadePossivelEmVenda(itemVenda);
+        }
+
     }
 
     @Transactional
@@ -181,6 +196,8 @@ public class VendaService {
             estoqueService.registrarSaida(itemVenda);
         }
     }
+
+
 
 
     //helpers
@@ -255,6 +272,16 @@ public class VendaService {
             throw new ResourceNotFoundException("quantidade insuficiente no estoque!");
         }
     }
+
+    public void verificaQuantidadePossivelEmVenda(ItemVenda itemVenda){
+        EstoqueItem estoqueItem1 = findEntityEstoqueItem(itemVenda.getEstoque().getId(),itemVenda.getItem().getId());
+        if(itemVenda.getQuantidade().compareTo(estoqueItem1.getQuantidade()) > 0){
+            throw new ValidationException("quantidade de itens no estoque insuficiente !");
+        }
+
+    }
+
+
 
 
 }

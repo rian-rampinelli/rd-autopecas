@@ -4,6 +4,7 @@ import com.rd.autopecas.erp_autopecas.domain.Item.Item;
 import com.rd.autopecas.erp_autopecas.domain.common.Auditable;
 import com.rd.autopecas.erp_autopecas.domain.estoque.Estoque;
 import com.rd.autopecas.erp_autopecas.domain.movimentacao_estoque.MovimentacaoEstoque;
+import com.rd.autopecas.erp_autopecas.domain.reserva.Reserva;
 import com.rd.autopecas.erp_autopecas.exceptions.ValidationException;
 import jakarta.persistence.*;
 import lombok.*;
@@ -25,8 +26,11 @@ public class EstoqueItem extends Auditable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "quantidade",nullable = false,precision = 10,scale = 2)
-    private BigDecimal quantidade;
+    @Column(name = "quantidade_disponivel",nullable = false,precision = 10,scale = 2)
+    private BigDecimal quantidadeDisponivel;
+
+    @Column(name = "quantidade_reservada",nullable = false,precision = 10,scale = 2)
+    private BigDecimal quantidadeReservada;
 
     @Column(name = "localizacao", nullable = false, length = 255)
     private String localizacao;
@@ -43,6 +47,19 @@ public class EstoqueItem extends Auditable {
     @ToString.Exclude
     private List<MovimentacaoEstoque> movimentacoesEstoque = new ArrayList();
 
+    @OneToMany(mappedBy = "estoqueItem")
+    private List<Reserva> reservas = new ArrayList<>();
+
+    public void addReserva(Reserva reserva){
+        reservas.add(reserva);
+        reserva.setEstoqueItem(this);
+    }
+
+    public void removeReserva(Reserva reserva){
+        reservas.remove(reserva);
+        reserva.setEstoqueItem(null);
+    }
+
     public void addMovimentacao(MovimentacaoEstoque movimentacaoEstoque) {
         movimentacoesEstoque.add(movimentacaoEstoque);
         movimentacaoEstoque.setEstoqueItem(this);
@@ -55,17 +72,16 @@ public class EstoqueItem extends Auditable {
 
     public void adicionarQuantidade(BigDecimal quantidadeAdd) {
         validaMaiorQueZero(quantidadeAdd);
-
-        setQuantidade(quantidade.add(quantidadeAdd));
+        setQuantidadeDisponivel(quantidadeDisponivel.add(quantidadeAdd));
     }
 
     public void removerQuantidade(BigDecimal quantidadeRemove) {
         validaMaiorQueZero(quantidadeRemove);
-
-        if (quantidadeRemove.compareTo(quantidade) > 0) {
+        if (quantidadeRemove.compareTo(quantidadeDisponivel) > 0) {
             throw new ValidationException("Quantidade indisponível para retirar.");
         }
-        setQuantidade(quantidade.subtract(quantidadeRemove));
+
+        setQuantidadeDisponivel(quantidadeDisponivel.subtract(quantidadeRemove));
 
     }
 
