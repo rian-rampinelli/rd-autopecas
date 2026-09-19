@@ -4,6 +4,9 @@ import com.rd.autopecas.erp_autopecas.domain.estoque_item.EstoqueItem;
 import com.rd.autopecas.erp_autopecas.domain.estoque_item.EstoqueItemRepository;
 import com.rd.autopecas.erp_autopecas.domain.item_venda.ItemVenda;
 import com.rd.autopecas.erp_autopecas.domain.item_venda.ItemVendaRepository;
+import com.rd.autopecas.erp_autopecas.domain.movimentacao_estoque.MovimentacaoEstoque;
+import com.rd.autopecas.erp_autopecas.domain.movimentacao_estoque.MovimentacaoEstoqueService;
+import com.rd.autopecas.erp_autopecas.domain.movimentacao_estoque.enums.TypeMovimentacao;
 import com.rd.autopecas.erp_autopecas.domain.reserva.dto.ReservaResponse;
 import com.rd.autopecas.erp_autopecas.domain.venda.Venda;
 import com.rd.autopecas.erp_autopecas.domain.venda.VendaRepository;
@@ -25,6 +28,7 @@ public class ReservaService {
     private final VendaRepository vendaRepository;
     private final EstoqueItemRepository estoqueItemRepository;
     private final ItemVendaRepository itemVendaRepository;
+    private final MovimentacaoEstoqueService movimentacaoEstoqueService;
 
     @Transactional
     public ReservaResponse adicionarReserva(EstoqueItem estoqueItem,ItemVenda itemVenda,BigDecimal qtdAumentar){
@@ -42,12 +46,14 @@ public class ReservaService {
         }
 
         tranfereQuantidadeDisponivelParaReserva(estoqueItem,itemVenda,qtdAumentar);
+
         log.info("irei salvar : reserva-adicionar reserva");
         estoqueItemRepository.save(estoqueItem);
         reservaRepository.save(reserva);
         return ReservaResponse.fromEntity(reserva);
     }
 
+    @Transactional
     public ReservaResponse removerReserva(EstoqueItem estoqueItem,ItemVenda itemVenda, BigDecimal qtdRetirar){
         log.info("entei em remove reserva de reserva");
         Reserva reserva = findEntityReserva(itemVenda.getVenda().getId(),estoqueItem.getId());
@@ -59,6 +65,7 @@ public class ReservaService {
         else{
             reservaRepository.save(reserva);
         }
+
         estoqueItemRepository.save(estoqueItem);
         return ReservaResponse.fromEntity(reserva);
 
@@ -67,19 +74,17 @@ public class ReservaService {
     public void tranfereQuantidadeDisponivelParaReserva(EstoqueItem estoqueItem,ItemVenda itemVenda,BigDecimal qtdAdicionar){
         estoqueItem.setQuantidadeReservada(itemVenda.getQuantidade());
         estoqueItem.setQuantidadeDisponivel(estoqueItem.getQuantidadeDisponivel().subtract(qtdAdicionar));
+        movimentacaoEstoqueService.registrarTransacao(estoqueItem,qtdAdicionar, TypeMovimentacao.ADICIONAR_RESERVA_INTER);
     }
 
     public void retornaQuantidadeReservadaParaDisponivel(EstoqueItem estoqueItem,Reserva reserva,BigDecimal qtdRetirar){
         reserva.setQuantidade(reserva.getQuantidade().subtract(qtdRetirar));
         estoqueItem.setQuantidadeDisponivel(estoqueItem.getQuantidadeDisponivel().add(qtdRetirar));
         estoqueItem.setQuantidadeReservada(estoqueItem.getQuantidadeReservada().subtract(qtdRetirar));
+        movimentacaoEstoqueService.registrarTransacao(estoqueItem,qtdRetirar, TypeMovimentacao.TIRAR_RESERVA_INTER);
     }
 
-    public void verificaQuantidadeDisponivelNoEstoque(ItemVenda itemVenda,EstoqueItem estoqueItem,BigDecimal qtdAdicionar){
-        if(qtdAdicionar.compareTo(estoqueItem.getQuantidadeDisponivel()) > 0){
-            throw new ValidationException("quantidade insuficiente disponivel no estoque");
-        }
-    }
+
 
     //helpers
     private Venda findEntityVenda(Long id){
@@ -105,6 +110,12 @@ public class ReservaService {
     private Reserva findEntityReserva(Long idVenda, Long idEstoqueItem){
         return reservaRepository.findByVenda_IdAndEstoqueItem_Id(idVenda,idEstoqueItem)
                 .orElse(null);
+    }
+
+    public void verificaQuantidadeDisponivelNoEstoque(ItemVenda itemVenda,EstoqueItem estoqueItem,BigDecimal qtdAdicionar){
+        if(qtdAdicionar.compareTo(estoqueItem.getQuantidadeDisponivel()) > 0){
+            throw new ValidationException("quantidade insuficiente disponivel no estoque");
+        }
     }
 
 

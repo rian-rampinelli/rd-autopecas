@@ -268,6 +268,7 @@ public class VendaService {
     }
 
 
+
     public void verificaQuantidadePossivelEmVenda(ItemVenda itemVenda){
         EstoqueItem estoqueItem1 = findEntityEstoqueItem(itemVenda.getEstoque().getId(),itemVenda.getItem().getId());
         if(itemVenda.getQuantidade().compareTo(estoqueItem1.getQuantidadeDisponivel()) > 0){

@@ -30,7 +30,6 @@ public class ItemVenda extends Auditable {
     private BigDecimal quantidade;
 
 
-
     @ManyToOne
     @JoinColumn(name = "id_item", nullable = false)
     private Item item;
