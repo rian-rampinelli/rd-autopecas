@@ -20,7 +20,7 @@ public record EstoqueItemResponse(
                 estoqueItem.getEstoque().getId(),
                 estoqueItem.getItem().getId(),
                 estoqueItem.getItem().getNome(),
-                estoqueItem.getQuantidade(),
+                estoqueItem.getQuantidadeDisponivel(),
                 estoqueItem.getLocalizacao()
         );
     }

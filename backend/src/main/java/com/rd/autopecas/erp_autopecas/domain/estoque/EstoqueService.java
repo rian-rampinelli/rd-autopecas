@@ -10,6 +10,7 @@ import com.rd.autopecas.erp_autopecas.domain.item_venda.ItemVenda;
 import com.rd.autopecas.erp_autopecas.domain.movimentacao_estoque.MovimentacaoEstoque;
 import com.rd.autopecas.erp_autopecas.domain.movimentacao_estoque.MovimentacaoEstoqueRepository;
 import com.rd.autopecas.erp_autopecas.domain.movimentacao_estoque.enums.TypeMovimentacao;
+import com.rd.autopecas.erp_autopecas.domain.reserva.ReservaService;
 import com.rd.autopecas.erp_autopecas.domain.unidade.Unidade;
 import com.rd.autopecas.erp_autopecas.domain.unidade.UnidadeRepository;
 import com.rd.autopecas.erp_autopecas.exceptions.ResourceNotFoundException;
@@ -29,6 +30,7 @@ public class EstoqueService {
     private final UnidadeRepository unidadeRepository;
     private final ItemRepository itemRepository;
     private final MovimentacaoEstoqueRepository movimentacaoEstoqueRepository;
+    private final ReservaService reservaService;
 
     public void deleteById(Long id){
         //verificar se estoque ja foi utilizada em alguma compra ou venda
@@ -42,7 +44,7 @@ public class EstoqueService {
         if(estoqueItem == null){
             Item item = findEntityItem(itemCompra.getItem().getId());
             estoqueItem = new EstoqueItem();
-            estoqueItem.setQuantidade(itemCompra.getQuantidade());
+            estoqueItem.setQuantidadeDisponivel(itemCompra.getQuantidade());
             estoqueItem.setLocalizacao(estoqueItem.getLocalizacao());
             estoqueItem.setEstoque(itemCompra.getEstoque());
             estoqueItem.setItem(item);
@@ -50,6 +52,7 @@ public class EstoqueService {
         else{
             estoqueItem.adicionarQuantidade(itemCompra.getQuantidade());
         }
+
         estoqueItemRepository.save(estoqueItem);
         registrarTransacao(itemCompra.getQuantidade(),TypeMovimentacao.ENTRADA,estoqueItem);
         return EstoqueItemResponse.fromEntity(estoqueItem);

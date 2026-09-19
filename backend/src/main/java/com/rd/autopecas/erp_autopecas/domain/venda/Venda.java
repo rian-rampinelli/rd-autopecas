@@ -5,7 +5,6 @@ import com.rd.autopecas.erp_autopecas.domain.common.Auditable;
 import com.rd.autopecas.erp_autopecas.domain.common.StatusTransacao;
 import com.rd.autopecas.erp_autopecas.domain.forma_pagamento.FormaPagamento;
 import com.rd.autopecas.erp_autopecas.domain.funcionario.Funcionario;
-import com.rd.autopecas.erp_autopecas.domain.item_compra.ItemCompra;
 import com.rd.autopecas.erp_autopecas.domain.item_venda.ItemVenda;
 import com.rd.autopecas.erp_autopecas.exceptions.ValidationException;
 import jakarta.persistence.*;

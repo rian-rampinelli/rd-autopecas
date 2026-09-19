@@ -1,0 +1,1 @@
+ALTER TABLE tb_reservas RENAME TO tb_reserva;

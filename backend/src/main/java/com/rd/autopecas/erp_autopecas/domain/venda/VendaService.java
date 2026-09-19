@@ -9,6 +9,7 @@ import com.rd.autopecas.erp_autopecas.domain.common.StatusTransacao;
 import com.rd.autopecas.erp_autopecas.domain.estoque_item.EstoqueItem;
 import com.rd.autopecas.erp_autopecas.domain.estoque_item.EstoqueItemRepository;
 import com.rd.autopecas.erp_autopecas.domain.item_venda.dto.ItemVendaRemoveRequest;
+import com.rd.autopecas.erp_autopecas.domain.reserva.ReservaService;
 import com.rd.autopecas.erp_autopecas.domain.venda.dto.VendaRequest;
 import com.rd.autopecas.erp_autopecas.domain.venda.dto.VendaResponse;
 import com.rd.autopecas.erp_autopecas.domain.venda.dto.VendaResumeResponse;
@@ -49,6 +50,7 @@ public class VendaService {
     private final EstoqueService estoqueService;
     private final EstoqueRepository estoqueRepository;
     private final EstoqueItemRepository estoqueItemRepository;
+    private final ReservaService reservaService;
 
 
     public VendaResponse findById(Long id){
@@ -79,40 +81,44 @@ public class VendaService {
 
     @Transactional
     public VendaResponse adicionarItemNaVenda(Long idVenda, ItemVendaRequest request){
+        log.info("entrei no add item venda");
         Venda venda = findEntityVenda(idVenda);
-        Estoque estoque = findEntityEstoque(request.idEstoque());
         verificaTransaçãoEmAndamento(venda);
+        Estoque estoque = findEntityEstoque(request.idEstoque());
+        EstoqueItem estoqueItem;
         ItemVenda itemVenda = findEntityItemVendaByItemAndVendaAndEstoque(request.idItem(),idVenda,request.idEstoque());
+
         if(itemVenda == null){
             itemVenda = new ItemVenda();
             Item item = findEntityItem(request.idItem());
-            verificaEstoqueDisponivel(estoque.getId(), request.idItem(),request.quantidade());
-            itemVenda.setQuantidade(request.quantidade());
-            itemVenda.setItemValue(request.itemValue());
             itemVenda.setItem(item);
             itemVenda.setEstoque(estoque);
+            estoqueItem = findEntityEstoqueItem(itemVenda.getEstoque().getId(),itemVenda.getItem().getId());
+            itemVenda.setQuantidade(request.quantidade());
+            itemVenda.setItemValue(request.itemValue());
             venda.addItemVenda(itemVenda);
         }
         else{
-            verificaEstoqueDisponivel(estoque.getId(), request.idItem(),request.quantidade());
+            estoqueItem = findEntityEstoqueItem(itemVenda.getEstoque().getId(),itemVenda.getItem().getId());
             itemVenda.setQuantidade(itemVenda.getQuantidade().add(request.quantidade()));
         }
 
-
-
+        reservaService.adicionarReserva(estoqueItem,itemVenda,request.quantidade());
         recalcularTotal(venda);
         itemVendaRepository.save(itemVenda);
         vendaRepository.save(venda);
         return VendaResponse.fromEntity(venda);
     }
 
-
-
     @Transactional
     public VendaResponse removerItemDaVenda(Long idVenda, ItemVendaRemoveRequest itemVendaRemoveRequest){
         Venda venda = findEntityVenda(idVenda);
         verificaTransaçãoEmAndamento(venda);
+
         ItemVenda itemVenda = findEntityItemVendaInVenda(itemVendaRemoveRequest.id(),idVenda);
+        EstoqueItem estoqueItem = findEntityEstoqueItem(itemVenda.getEstoque().getId(),itemVenda.getItem().getId());
+
+        reservaService.removerReserva(estoqueItem,itemVenda,itemVendaRemoveRequest.quantidade());
         itemVenda.diminuirQuantidade(itemVendaRemoveRequest.quantidade(),itemVenda);
         if(itemVenda.getQuantidade().compareTo(BigDecimal.ZERO) == 0){
             itemVendaRepository.delete(itemVenda);
@@ -130,8 +136,6 @@ public class VendaService {
         vendaRepository.save(venda);
         return VendaResponse.fromEntity(venda);
     }
-
-
 
     @Transactional
     public VendaResponse processarPagamento(Long idVenda,Long idFormaDePagamento){
@@ -197,9 +201,6 @@ public class VendaService {
         }
     }
 
-
-
-
     //helpers
     private Venda findEntityVenda(Long id){
         return vendaRepository.findById(id)
@@ -244,7 +245,7 @@ public class VendaService {
 
     private EstoqueItem findEntityEstoqueItem(Long idEstoque, Long idItem){
         return estoqueItemRepository.findByEstoque_IdAndItem_Id(idEstoque, idItem)
-                .orElseThrow(() -> new ResourceNotFoundException("Item não pertence à essa estoque!."));
+                .orElse(null);
     }
 
     private void verificaTransaçãoEmAndamento(Venda venda){
@@ -266,16 +267,10 @@ public class VendaService {
         }
     }
 
-    private void verificaEstoqueDisponivel(Long idEstoque, Long idItem, BigDecimal qtdAdicionada){
-        EstoqueItem estoqueItem = findEntityEstoqueItem(idEstoque,idItem);
-        if(estoqueItem.getQuantidade().compareTo(qtdAdicionada) < 0){
-            throw new ResourceNotFoundException("quantidade insuficiente no estoque!");
-        }
-    }
 
     public void verificaQuantidadePossivelEmVenda(ItemVenda itemVenda){
         EstoqueItem estoqueItem1 = findEntityEstoqueItem(itemVenda.getEstoque().getId(),itemVenda.getItem().getId());
-        if(itemVenda.getQuantidade().compareTo(estoqueItem1.getQuantidade()) > 0){
+        if(itemVenda.getQuantidade().compareTo(estoqueItem1.getQuantidadeDisponivel()) > 0){
             throw new ValidationException("quantidade de itens no estoque insuficiente !");
         }
 

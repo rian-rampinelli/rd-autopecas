@@ -7,3 +7,7 @@ CREATE TABLE "tb_reservas" (
    CONSTRAINT "fk_reserva_venda" FOREIGN KEY (id_venda) REFERENCES venda(id),
    CONSTRAINT "fk_reserva_item_estoque" FOREIGN KEY (id_estoque_item) REFERENCES estoque_item(id)
 );
+
+ALTER TABLE estoque_item
+ADD COLUMN quantidade_reservada DECIMAL(10,2) NOT NULL DEFAULT 0;
+RENAME COLUMN quantidade TO quantidade_disponivel;

@@ -15,7 +15,7 @@ public record EstoqueItemRequest(
 ) {
     public EstoqueItem toEntity(){
         EstoqueItem estoqueItem = new EstoqueItem();
-        estoqueItem.setQuantidade(quantidade);
+        estoqueItem.setQuantidadeDisponivel(quantidade);
         estoqueItem.setLocalizacao(localizacao);
         return estoqueItem;
     }
