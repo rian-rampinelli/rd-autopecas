@@ -18,6 +18,7 @@ import com.rd.autopecas.erp_autopecas.domain.funcionario.Funcionario;
 import com.rd.autopecas.erp_autopecas.domain.funcionario.FuncionarioRepository;
 import com.rd.autopecas.erp_autopecas.domain.item_compra.ItemCompra;
 import com.rd.autopecas.erp_autopecas.domain.item_compra.ItemCompraRepository;
+import com.rd.autopecas.erp_autopecas.domain.item_compra.dto.ItemCompraRemoveRequest;
 import com.rd.autopecas.erp_autopecas.domain.item_compra.dto.ItemCompraRequest;
 import com.rd.autopecas.erp_autopecas.domain.movimentacao_estoque.enums.TypeMovimentacao;
 import com.rd.autopecas.erp_autopecas.exceptions.ResourceNotFoundException;
@@ -96,12 +97,24 @@ public class CompraService {
     }
 
     @Transactional
-    public CompraResponse removerItemDaCompra(Long idCompra,Long idItemCompra){
+    public CompraResponse removerItemDaCompra(Long idCompra, ItemCompraRemoveRequest request){
         Compra compra = findEntityCompra(idCompra);
         verificaTransaçãoEmAndamento(compra);
-        ItemCompra itemCompra = findEntityItemCompraInCompra(idItemCompra,idCompra);
-        compra.removeItemCompra(itemCompra);
+        ItemCompra itemCompra = findEntityItemCompraInCompra(request.id(),idCompra);
+        itemCompra.diminuirQuantidade(itemCompra,request.quantidade());
+        if(itemCompra.getQuantidade().compareTo(BigDecimal.ZERO) == 0){
+            itemCompraRepository.delete(itemCompra);
+        }
         recalcularTotal(compra);
+        compraRepository.save(compra);
+        return CompraResponse.fromEntity(compra);
+    }
+
+    public CompraResponse registrarAbandono(Long idCompra){
+        log.info("entrei na abandono");
+        Compra compra = findEntityCompra(idCompra);
+        verificaTransaçãoEmAndamento(compra);
+        compra.setStatus(StatusTransacao.ABANDONADA);
         compraRepository.save(compra);
         return CompraResponse.fromEntity(compra);
     }
@@ -139,6 +152,7 @@ public class CompraService {
         return CompraResponse.fromEntity(compra);
     }
 
+    //por enquanto deixar cancelamento como so possivel antes da entrega
     public CompraResponse registrarCancelamento(Long idCompra){
         Compra compra = findEntityCompra(idCompra);
         verificaTransaçãoFinalizada(compra);
@@ -147,18 +161,7 @@ public class CompraService {
         return CompraResponse.fromEntity(compra);
     }
 
-
-    public CompraResponse registrarAbandono(Long idCompra){
-        log.info("entrei na abandono");
-        Compra compra = findEntityCompra(idCompra);
-        verificaTransaçãoEmAndamento(compra);
-        compra.setStatus(StatusTransacao.ABANDONADA);
-        compraRepository.save(compra);
-        return CompraResponse.fromEntity(compra);
-    }
-
-
-
+    //metodos internos da logica de compra
     private void recalcularTotal(Compra compra){
         BigDecimal totalValue = compra.calcularTotal();
         compra.setTotalValue(totalValue);
@@ -207,10 +210,6 @@ public class CompraService {
     }
 
 
-    private ItemCompra findEntityItemCompra(Long id){
-        return itemCompraRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("item na compra não encontrado"));
-    }
 
     private FormaPagamento findEntityFormaPagamento(Long id){
         return formaPagamentoRepository.findById(id)

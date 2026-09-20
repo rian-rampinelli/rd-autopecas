@@ -4,6 +4,7 @@ import com.rd.autopecas.erp_autopecas.domain.compra.dto.CompraRequest;
 import com.rd.autopecas.erp_autopecas.domain.compra.dto.CompraResponse;
 import com.rd.autopecas.erp_autopecas.domain.compra.dto.CompraResumeResponse;
 import com.rd.autopecas.erp_autopecas.domain.compra.filter.CompraFilter;
+import com.rd.autopecas.erp_autopecas.domain.item_compra.dto.ItemCompraRemoveRequest;
 import com.rd.autopecas.erp_autopecas.domain.item_compra.dto.ItemCompraRequest;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -42,45 +43,47 @@ public class CompraController {
         return ResponseEntity.created(URI.create("/compras")).body(compraService.gerarCompra(compraRequest));
     }
     @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'ESTOQUISTA')")
-    @PostMapping("{id}")
+    @PostMapping("{id}/adicionaritem")
     public ResponseEntity<CompraResponse> adicionarItemCompra(@PathVariable Long id, @RequestBody @Valid ItemCompraRequest itemCompraRequest){
-        return ResponseEntity.created(URI.create("/compras")).body(compraService.adicionarItemNaCompra(id,itemCompraRequest));
+        return ResponseEntity.ok(compraService.adicionarItemNaCompra(id,itemCompraRequest));
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'ESTOQUISTA')")
-    @DeleteMapping("{idCompra}/itemcompra/{idItemCompra}")
-    public ResponseEntity<CompraResponse> removerItemCompra(@PathVariable Long idCompra,@PathVariable Long idItemCompra){
-        return ResponseEntity.created(URI.create("/compras")).body(compraService.removerItemDaCompra(idCompra,idItemCompra));
+    @DeleteMapping("{idCompra}/removeritem")
+    public ResponseEntity<CompraResponse> removerItemCompra(@PathVariable Long idCompra, @RequestBody @Valid ItemCompraRemoveRequest request){
+        return ResponseEntity.ok(compraService.removerItemDaCompra(idCompra,request));
+    }
+
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'ESTOQUISTA')")
+    @PostMapping("{idCompra}/abandonar")
+    public ResponseEntity<CompraResponse> registrarAbandono(@PathVariable Long idCompra){
+        return ResponseEntity.ok(compraService.registrarAbandono(idCompra));
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'ESTOQUISTA')")
     @PostMapping("{idCompra}/processar_pagamento/{idFormaPagamento}")
     public ResponseEntity<CompraResponse> processarPagamento(@PathVariable Long idCompra,@PathVariable Long idFormaPagamento){
-        return ResponseEntity.created(URI.create("/compras")).body(compraService.processarPagamento(idCompra,idFormaPagamento));
+        return ResponseEntity.ok(compraService.processarPagamento(idCompra,idFormaPagamento));
     }
     @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'ESTOQUISTA')")
     @PostMapping("{idCompra}/finalizar")
     public ResponseEntity<CompraResponse> finalizarCompra(@PathVariable Long idCompra){
-        return ResponseEntity.created(URI.create("/compras")).body(compraService.finalizarCompra(idCompra));
+        return ResponseEntity.ok(compraService.finalizarCompra(idCompra));
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'ESTOQUISTA')")
     @PostMapping("{idCompra}/entregar")
     public ResponseEntity<CompraResponse> entregarCompra(@PathVariable Long idCompra){
-        return ResponseEntity.created(URI.create("/compras")).body(compraService.registrarEntrega(idCompra));
+        return ResponseEntity.ok(compraService.registrarEntrega(idCompra));
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'ESTOQUISTA')")
     @PostMapping("{idCompra}/cancelar")
     public ResponseEntity<CompraResponse> cancelarCompra(@PathVariable Long idCompra){
-        return ResponseEntity.created(URI.create("/compras")).body(compraService.registrarCancelamento(idCompra));
+        return ResponseEntity.ok(compraService.registrarCancelamento(idCompra));
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE', 'ESTOQUISTA')")
-    @PostMapping("{idCompra}/abandonar")
-    public ResponseEntity<CompraResponse> registrarAbandono(@PathVariable Long idCompra){
-        return ResponseEntity.created(URI.create("/compras")).body(compraService.registrarAbandono(idCompra));
-    }
 
 
 }

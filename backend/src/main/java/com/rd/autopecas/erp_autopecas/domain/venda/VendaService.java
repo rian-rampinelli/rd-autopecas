@@ -116,10 +116,8 @@ public class VendaService {
     public VendaResponse removerItemDaVenda(Long idVenda, ItemVendaRemoveRequest itemVendaRemoveRequest){
         Venda venda = findEntityVenda(idVenda);
         verificaTransaçãoEmAndamento(venda);
-
         ItemVenda itemVenda = findEntityItemVendaInVenda(itemVendaRemoveRequest.id(),idVenda);
         EstoqueItem estoqueItem = findEntityEstoqueItem(itemVenda.getEstoque().getId(),itemVenda.getItem().getId());
-
         reservaService.removerReserva(estoqueItem,itemVenda,itemVendaRemoveRequest.quantidade());
         itemVenda.diminuirQuantidade(itemVendaRemoveRequest.quantidade(),itemVenda);
         if(itemVenda.getQuantidade().compareTo(BigDecimal.ZERO) == 0){
