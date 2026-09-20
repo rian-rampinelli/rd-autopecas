@@ -9,6 +9,7 @@ import com.rd.autopecas.erp_autopecas.domain.common.StatusTransacao;
 import com.rd.autopecas.erp_autopecas.domain.estoque_item.EstoqueItem;
 import com.rd.autopecas.erp_autopecas.domain.estoque_item.EstoqueItemRepository;
 import com.rd.autopecas.erp_autopecas.domain.item_venda.dto.ItemVendaRemoveRequest;
+import com.rd.autopecas.erp_autopecas.domain.movimentacao_estoque.enums.TypeMovimentacao;
 import com.rd.autopecas.erp_autopecas.domain.reserva.Reserva;
 import com.rd.autopecas.erp_autopecas.domain.reserva.ReservaService;
 import com.rd.autopecas.erp_autopecas.domain.venda.dto.VendaRequest;
@@ -156,7 +157,6 @@ public class VendaService {
     }
 
 
-
     @Transactional
     public VendaResponse finalizarVenda(Long idVenda){
         Venda venda = findEntityVenda(idVenda);
@@ -179,12 +179,14 @@ public class VendaService {
     @Transactional
     public VendaResponse registrarCancelamento(Long idVenda){
         Venda venda = findEntityVenda(idVenda);
-        verificaTransaçãoFinalizada(venda);
+        verificaTransaçãoFinalizadaOuEntregue(venda);
+        registrarReentradaNoEstoque(venda);
         venda.setStatus(StatusTransacao.CANCELADA);
         vendaRepository.save(venda);
         return VendaResponse.fromEntity(venda);
     }
 
+    //logica interna de vendas
 
     private void recalcularTotal(Venda venda){
         BigDecimal totalValue = venda.calcularTotal();
@@ -193,7 +195,13 @@ public class VendaService {
 
     private void registrarBaixaNoEstoque(Venda venda){
         for(ItemVenda itemVenda : venda.getItemsVenda()){
-            estoqueService.registrarSaida(itemVenda);
+            estoqueService.registrarSaida(itemVenda.getEstoque(),itemVenda.getItem(),itemVenda.getQuantidade());
+        }
+    }
+
+    private void registrarReentradaNoEstoque(Venda venda){
+        for(ItemVenda itemVenda : venda.getItemsVenda()){
+            estoqueService.registrarEntrada(itemVenda.getEstoque(),itemVenda.getItem(),itemVenda.getQuantidade(), TypeMovimentacao.ENTRADA_CANCELAMENTO);
         }
     }
 
@@ -270,11 +278,11 @@ public class VendaService {
         }
     }
 
-
-
-
-
-
+    private void verificaTransaçãoFinalizadaOuEntregue(Venda venda){
+        if(venda.getStatus() != StatusTransacao.FINALIZADA && venda.getStatus() != StatusTransacao.ENTREGUE){
+            throw new ValidationException("Transação precisa estar finalizada ou ja ter sido entregue!");
+        }
+    }
 
 
 }

@@ -17,6 +17,8 @@ import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+
 
 @Service
 @AllArgsConstructor
@@ -36,35 +38,34 @@ public class EstoqueService {
     }
 
     @Transactional
-    public EstoqueItemResponse registrarEntrada(ItemCompra itemCompra){
-        EstoqueItem estoqueItem = findByIdEstoqueAndItem(itemCompra.getEstoque().getId(),itemCompra.getItem().getId());
+    public EstoqueItemResponse registrarEntrada(Estoque estoque, Item item, BigDecimal qtd,TypeMovimentacao tipoMovimentacao){
+        EstoqueItem estoqueItem = findByIdEstoqueAndItem(estoque.getId(),item.getId());
         if(estoqueItem == null){
-            Item item = findEntityItem(itemCompra.getItem().getId());
             estoqueItem = new EstoqueItem();
-            estoqueItem.setQuantidadeDisponivel(itemCompra.getQuantidade());
+            estoqueItem.setQuantidadeDisponivel(qtd);
             estoqueItem.setLocalizacao(estoqueItem.getLocalizacao());
-            estoqueItem.setEstoque(itemCompra.getEstoque());
+            estoqueItem.setEstoque(estoque);
             estoqueItem.setItem(item);
         }
         else{
-            estoqueItem.adicionarQuantidade(itemCompra.getQuantidade());
+            estoqueItem.adicionarQuantidade(qtd);
         }
 
         estoqueItemRepository.save(estoqueItem);
-        movimentacaoEstoqueService.registrarTransacao(estoqueItem,itemCompra.getQuantidade(),TypeMovimentacao.ENTRADA);
+        movimentacaoEstoqueService.registrarTransacao(estoqueItem,qtd,tipoMovimentacao);
         return EstoqueItemResponse.fromEntity(estoqueItem);
     }
 
     @Transactional
-    public EstoqueItemResponse registrarSaida(ItemVenda itemVenda){
-        EstoqueItem estoqueItem = findByIdEstoqueAndItem(itemVenda.getEstoque().getId(), itemVenda.getItem().getId());
+    public EstoqueItemResponse registrarSaida(Estoque estoque,Item item,BigDecimal qtd){
+        EstoqueItem estoqueItem = findByIdEstoqueAndItem(estoque.getId(),item.getId());
 
         if(estoqueItem == null){
             throw new ResourceNotFoundException("nao existe esse item nesse estoque!");
         }
         //n uso save pois o hibernate ja gerencia com o @Transactional,fazendo um update no final
-        estoqueItem.removerQuantidade(itemVenda.getQuantidade());
-        movimentacaoEstoqueService.registrarTransacao(estoqueItem,itemVenda.getQuantidade(),TypeMovimentacao.SAIDA);
+        estoqueItem.removerQuantidade(qtd);
+        movimentacaoEstoqueService.registrarTransacao(estoqueItem,qtd,TypeMovimentacao.SAIDA);
         return EstoqueItemResponse.fromEntity(estoqueItem);
     }
 

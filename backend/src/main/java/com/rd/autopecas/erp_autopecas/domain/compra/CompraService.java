@@ -19,6 +19,7 @@ import com.rd.autopecas.erp_autopecas.domain.funcionario.FuncionarioRepository;
 import com.rd.autopecas.erp_autopecas.domain.item_compra.ItemCompra;
 import com.rd.autopecas.erp_autopecas.domain.item_compra.ItemCompraRepository;
 import com.rd.autopecas.erp_autopecas.domain.item_compra.dto.ItemCompraRequest;
+import com.rd.autopecas.erp_autopecas.domain.movimentacao_estoque.enums.TypeMovimentacao;
 import com.rd.autopecas.erp_autopecas.exceptions.ResourceNotFoundException;
 import com.rd.autopecas.erp_autopecas.exceptions.ValidationException;
 import jakarta.transaction.Transactional;
@@ -165,12 +166,9 @@ public class CompraService {
 
     private void registrarEntradaNoEstoque(Compra compra){
         for(ItemCompra itemCompra : compra.getItemsCompra()){
-            estoqueService.registrarEntrada(itemCompra);
+            estoqueService.registrarEntrada(itemCompra.getEstoque(),itemCompra.getItem(),itemCompra.getQuantidade(), TypeMovimentacao.ENTRADA);
         }
     }
-
-
-
 
     //helpers
     private Compra findEntityCompra(Long id){
