@@ -9,6 +9,7 @@ import com.rd.autopecas.erp_autopecas.domain.common.StatusTransacao;
 import com.rd.autopecas.erp_autopecas.domain.estoque_item.EstoqueItem;
 import com.rd.autopecas.erp_autopecas.domain.estoque_item.EstoqueItemRepository;
 import com.rd.autopecas.erp_autopecas.domain.item_venda.dto.ItemVendaRemoveRequest;
+import com.rd.autopecas.erp_autopecas.domain.reserva.Reserva;
 import com.rd.autopecas.erp_autopecas.domain.reserva.ReservaService;
 import com.rd.autopecas.erp_autopecas.domain.venda.dto.VendaRequest;
 import com.rd.autopecas.erp_autopecas.domain.venda.dto.VendaResponse;
@@ -128,10 +129,13 @@ public class VendaService {
         return VendaResponse.fromEntity(venda);
     }
 
+    @Transactional
     public VendaResponse registrarAbandono(Long idVenda){
         log.info("entrei na abandono");
         Venda venda = findEntityVenda(idVenda);
         verificaTransaçãoEmAndamento(venda);
+        liberarReservasDeVendaAbandonada(venda);
+        log.info("depoois do for");
         venda.setStatus(StatusTransacao.ABANDONADA);
         vendaRepository.save(venda);
         return VendaResponse.fromEntity(venda);
@@ -141,10 +145,9 @@ public class VendaService {
     public VendaResponse processarPagamento(Long idVenda,Long idFormaDePagamento){
         log.info("entrei em processar pagamento pelo menos");
         Venda venda = findEntityVenda(idVenda);
-        FormaPagamento formaPagamento = findEntityFormaPagamento(idFormaDePagamento);
         verificaTransaçãoEmAndamento(venda);
+        FormaPagamento formaPagamento = findEntityFormaPagamento(idFormaDePagamento);
         venda.setStatus(StatusTransacao.AGUARDANDO_PAGAMENTO);
-        verificaQuantidadeDeItensVendaEmVenda(venda);
         log.info("pagamento foi aprovado");
         venda.setStatus(StatusTransacao.PAGA);
         venda.setFormaPagamento(formaPagamento);
@@ -152,12 +155,7 @@ public class VendaService {
         return VendaResponse.fromEntity(venda);
     }
 
-    public void verificaQuantidadeDeItensVendaEmVenda(Venda venda){
-        for(ItemVenda itemVenda : venda.getItemsVenda()){
-            verificaQuantidadePossivelEmVenda(itemVenda);
-        }
 
-    }
 
     @Transactional
     public VendaResponse finalizarVenda(Long idVenda){
@@ -169,9 +167,6 @@ public class VendaService {
         return VendaResponse.fromEntity(venda);
     }
 
-
-
-    @Transactional
     public VendaResponse registrarEntrega(Long idVenda){
         log.info("entrei na entrega");
         Venda venda = findEntityVenda(idVenda);
@@ -181,6 +176,7 @@ public class VendaService {
         return VendaResponse.fromEntity(venda);
     }
 
+    @Transactional
     public VendaResponse registrarCancelamento(Long idVenda){
         Venda venda = findEntityVenda(idVenda);
         verificaTransaçãoFinalizada(venda);
@@ -198,6 +194,13 @@ public class VendaService {
     private void registrarBaixaNoEstoque(Venda venda){
         for(ItemVenda itemVenda : venda.getItemsVenda()){
             estoqueService.registrarSaida(itemVenda);
+        }
+    }
+
+    private void liberarReservasDeVendaAbandonada(Venda venda){
+        for(ItemVenda itemVenda: venda.getItemsVenda()){
+            EstoqueItem estoqueItem = findEntityEstoqueItem(itemVenda.getEstoque().getId(),itemVenda.getItem().getId());
+            reservaService.removerReserva(estoqueItem,itemVenda,itemVenda.getQuantidade());
         }
     }
 
@@ -269,13 +272,7 @@ public class VendaService {
 
 
 
-    public void verificaQuantidadePossivelEmVenda(ItemVenda itemVenda){
-        EstoqueItem estoqueItem1 = findEntityEstoqueItem(itemVenda.getEstoque().getId(),itemVenda.getItem().getId());
-        if(itemVenda.getQuantidade().compareTo(estoqueItem1.getQuantidadeDisponivel()) > 0){
-            throw new ValidationException("quantidade de itens no estoque insuficiente !");
-        }
 
-    }
 
 
 

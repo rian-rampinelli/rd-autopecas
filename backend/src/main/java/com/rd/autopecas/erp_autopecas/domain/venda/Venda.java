@@ -6,6 +6,7 @@ import com.rd.autopecas.erp_autopecas.domain.common.StatusTransacao;
 import com.rd.autopecas.erp_autopecas.domain.forma_pagamento.FormaPagamento;
 import com.rd.autopecas.erp_autopecas.domain.funcionario.Funcionario;
 import com.rd.autopecas.erp_autopecas.domain.item_venda.ItemVenda;
+import com.rd.autopecas.erp_autopecas.domain.reserva.Reserva;
 import com.rd.autopecas.erp_autopecas.exceptions.ValidationException;
 import jakarta.persistence.*;
 import lombok.*;
@@ -49,6 +50,10 @@ public class Venda extends Auditable {
     @OneToMany(mappedBy = "venda")
     @ToString.Exclude
     private List<ItemVenda> ItemsVenda = new ArrayList();
+
+    @OneToMany(mappedBy = "venda")
+    @ToString.Exclude
+    private List<Reserva> reservas = new ArrayList();
 
 
     public void addItemVenda(ItemVenda itemVenda) {

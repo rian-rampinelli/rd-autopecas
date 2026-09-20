@@ -77,11 +77,11 @@ public class EstoqueItem extends Auditable {
 
     public void removerQuantidade(BigDecimal quantidadeRemove) {
         validaMaiorQueZero(quantidadeRemove);
-        if (quantidadeRemove.compareTo(quantidadeDisponivel) > 0) {
+        if (quantidadeRemove.compareTo(quantidadeReservada) > 0) {
             throw new ValidationException("Quantidade indisponível para retirar.");
         }
 
-        setQuantidadeDisponivel(quantidadeDisponivel.subtract(quantidadeRemove));
+        setQuantidadeReservada(quantidadeReservada.subtract(quantidadeRemove));
 
     }
 

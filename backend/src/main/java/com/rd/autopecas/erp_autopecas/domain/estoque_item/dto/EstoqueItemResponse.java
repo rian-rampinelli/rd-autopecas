@@ -9,7 +9,8 @@ public record EstoqueItemResponse(
         Long idEstoque,
         Long idItem,
         String nomeItem,
-        BigDecimal quantidade,
+        BigDecimal quantidadeDisponivel,
+        BigDecimal quantidadeReservada,
         String localizacao
 
 
@@ -21,6 +22,7 @@ public record EstoqueItemResponse(
                 estoqueItem.getItem().getId(),
                 estoqueItem.getItem().getNome(),
                 estoqueItem.getQuantidadeDisponivel(),
+                estoqueItem.getQuantidadeReservada(),
                 estoqueItem.getLocalizacao()
         );
     }
