@@ -1,18 +1,18 @@
 import { cn } from "../lib/utils"
-import { Button } from "../components/ui/button"
-import {Card,CardContent,CardDescription,CardHeader,CardTitle,} from "../components/ui/card"
-import {Field,FieldDescription,FieldGroup,FieldLabel} from "../components/ui/field"
-import { Input } from "../components/ui/input"
+import { Button } from "./ui/button"
+import {Card,CardContent,CardDescription,CardHeader,CardTitle,} from "./ui/card"
+import {Field,FieldDescription,FieldGroup,FieldLabel} from "./ui/field"
+import { Input } from "./ui/input"
 import { Link } from "react-router-dom";
 
-export function LoginForm({className,...props}: React.ComponentProps<"div">) {
+export function RegisterForm({className,...props}: React.ComponentProps<"div">) {
   return (
     <div className={ cn("flex flex-col gap-6", className)} {...props}>
       <Card>
         <CardHeader>
-          <CardTitle>Entre com sua conta</CardTitle>
+          <CardTitle>Crie sua conta</CardTitle>
           <CardDescription>
-            Digite seu email e senha abaixo para acessar
+            Digite seu dados de cadastro
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -30,19 +30,19 @@ export function LoginForm({className,...props}: React.ComponentProps<"div">) {
               <Field>
                 <div className="flex items-center">
                   <FieldLabel htmlFor="password">Password</FieldLabel>
-                  <a
-                    href="#"
-                    className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
-                  >
-                    Esqueceu a senha?
-                  </a>
                 </div>
                 <Input placeholder="************" id="password" type="password" required />
               </Field>
               <Field>
-                <Button type="submit">Login</Button>
+                <div className="flex items-center">
+                  <FieldLabel htmlFor="password">Confirme PassWord</FieldLabel>
+                </div>
+                <Input placeholder="************" id="password" type="password" required />
+              </Field>
+              <Field>
+                <Button type="submit">Criar</Button>
                 <FieldDescription className="text-center">
-                  Não tem conta ainda? <Link className=":hover text-blue-400" to={"/register"}>Cadastre-se</Link>
+                  Ja possui conta? <Link className=":hover text-blue-400" to={"/login"}>Entre</Link>
                 </FieldDescription>
               </Field>
             </FieldGroup>

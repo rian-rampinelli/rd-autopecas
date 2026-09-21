@@ -1,7 +1,7 @@
 import type { ReactNode } from "react"
-import './styles/ContainerLogin.css'
+import './ContainerCenter.css'
 
-function ContainerLogin({children}:{children: ReactNode}){
+function ContainerCenter({children}:{children: ReactNode}){
     return(
         <div className="container-login">
             {children}
@@ -9,4 +9,4 @@ function ContainerLogin({children}:{children: ReactNode}){
     )
 }
 
-export default ContainerLogin
+export default ContainerCenter

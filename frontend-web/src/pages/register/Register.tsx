@@ -1,17 +1,16 @@
 import ContainerCenter from "../../layout/container-center/ContainerCenter"
-import "./Login.css"
-import { LoginForm } from "../../components/login-form"
 import Nav from "../../components/nav/Nav"
+import { RegisterForm } from "../../components/register-form"
 
 
 
-function Login() {
+function Register() {
     return (
         <ContainerCenter>
             <Nav></Nav>
-            <LoginForm className="w-[450px]"/>
+            <RegisterForm className="w-[450px]"/>
         </ContainerCenter>
     )
 }
 
-export default Login
+export default Register
