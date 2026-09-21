@@ -70,6 +70,7 @@ public class ReservaService {
 
     }
 
+    //metodos internos da logica de reserva
     public void tranfereQuantidadeDisponivelParaReserva(EstoqueItem estoqueItem,ItemVenda itemVenda,BigDecimal qtdAdicionar){
         estoqueItem.setQuantidadeReservada(itemVenda.getQuantidade());
         estoqueItem.setQuantidadeDisponivel(estoqueItem.getQuantidadeDisponivel().subtract(qtdAdicionar));

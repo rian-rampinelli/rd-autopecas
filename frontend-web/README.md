@@ -5,3 +5,4 @@
 - React Router
 - React Icons
 - Taiwind
+- Shad cn
