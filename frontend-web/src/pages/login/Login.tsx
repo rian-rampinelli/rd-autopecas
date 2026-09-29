@@ -1,10 +1,6 @@
 import ContainerCenter from "../../layout/container-center/ContainerCenter"
-import "./Login.css"
 import { LoginForm } from "../../components/login-form"
 import Nav from "../../components/nav/Nav"
-
-
-
 
 function Login() {
     return (

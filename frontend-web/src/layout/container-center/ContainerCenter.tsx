@@ -1,10 +1,8 @@
 import type { ReactNode } from "react"
 
-import "./ContainerCenter.css"
-
 function ContainerCenter({children,className}: {children:ReactNode,className?: string}) {
     return (
-        <div className={`container-login ${className ?? ""}`}>
+        <div className={`flex justify-center items-center bg-[#111111] min-h-[100vh]  ${className ?? ""}`}>
             {children}
         </div>
     )
