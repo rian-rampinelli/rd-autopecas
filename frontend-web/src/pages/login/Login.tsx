@@ -5,11 +5,15 @@ import Nav from "../../components/nav/Nav"
 
 
 
+
 function Login() {
     return (
         <ContainerCenter>
             <Nav></Nav>
-            <LoginForm className="w-[450px]"/>
+            <div className="flex">
+                <LoginForm className="w-[450px]"/>
+            </div>
+        
         </ContainerCenter>
     )
 }

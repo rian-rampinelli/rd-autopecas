@@ -6,6 +6,15 @@ import { Input } from "./ui/input"
 import { Link } from "react-router-dom";
 
 export function RegisterForm({className,...props}: React.ComponentProps<"div">) {
+  /*
+  const [email,SetEmail] = useState("")
+  const [password,SetPassword] = useState("")
+  const [confirmPassword,SetConfirmPassword] = useState("")
+  const [cpf,SetCpf] = useState("")
+  const [salary,SetSalary] = useState("")
+  const [cargo,SetCargo] = useState("")
+  */
+ 
   return (
     <div className={ cn("flex flex-col gap-6", className)} {...props}>
       <Card>
