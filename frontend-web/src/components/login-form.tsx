@@ -1,9 +1,8 @@
 import { cn } from "../lib/utils"
 import { Button } from "../components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, } from "../components/ui/card"
-import { Field, FieldDescription, FieldGroup, FieldLabel } from "../components/ui/field"
+import { Field,  FieldGroup, FieldLabel } from "../components/ui/field"
 import { Input } from "../components/ui/input"
-import { Link } from "react-router-dom";
 import { useState } from "react"
 import FazerLogin from "../api/Login"
 
@@ -55,9 +54,6 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
               </Field>
               <Field>
                 <Button type="submit">Login</Button>
-                <FieldDescription className="text-center">
-                  Não tem conta ainda? <Link className=":hover text-blue-400" to={"/register"}>Cadastre-se</Link>
-                </FieldDescription>
               </Field>
             </FieldGroup>
           </form>

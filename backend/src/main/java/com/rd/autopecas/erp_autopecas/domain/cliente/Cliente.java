@@ -74,4 +74,8 @@ public class Cliente  extends Auditable {
         vendas.remove(venda);
         venda.setCliente(null);
     }
+
+    public boolean idadeValida(int idade){
+        return idade >= 18 && idade <= 60;
+    }
 }
