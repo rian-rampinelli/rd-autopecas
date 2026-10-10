@@ -6,6 +6,7 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+   --color-brand-bg-secundary: var(--brand-bg-secundary);
     --font-heading: var(--font-sans);
     --font-sans: 'Inter Variable', sans-serif;
     --color-sidebar-ring: var(--sidebar-ring);
@@ -51,6 +52,7 @@
 :root {
 
     --brand:red;
+    --brand-bg-secundary:#111111;
 
     
     --background: oklch(1 0 0);
