@@ -1,20 +1,27 @@
 import { cn } from "../lib/utils"
 import { Button } from "../components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, } from "../components/ui/card"
-import { Field,  FieldGroup, FieldLabel } from "../components/ui/field"
+import { Field, FieldGroup, FieldLabel } from "../components/ui/field"
 import { Input } from "../components/ui/input"
 import { useState } from "react"
 import FazerLogin from "../api/Login"
+import { useNavigate } from "react-router-dom"
 
 export function LoginForm({ className, ...props }: React.ComponentProps<"div">) {
+  const navigate = useNavigate()
   const [email, setEmail] = useState("")
   const [senha, setSenha] = useState("")
 
   async function handleLogin(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault()
-    const data = await FazerLogin(email,senha)
-    console.log(data)
-
+    try {
+      const data = await FazerLogin(email, senha)
+      navigate("/register")
+      console.log(data)
+    } catch (error) {
+      console.error("Erro no login:", error);
+      throw error;
+    }
   }
 
   return (
