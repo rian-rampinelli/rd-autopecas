@@ -1,4 +1,4 @@
-export default async function FazerLogin(email:string, password:string) {
+export default async function FazerLogin(email: string, password: string) {
     try {
         const response = await fetch("http://localhost:8080/auth/login", {
             method: "POST",
@@ -15,7 +15,10 @@ export default async function FazerLogin(email:string, password:string) {
             throw new Error("Erro ao realizar login");
         }
 
+
         const data = await response.json();
+        console.log(data)
+        localStorage.setItem("token", data.accessToken);
 
         return data;
 

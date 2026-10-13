@@ -15,9 +15,9 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
   async function handleLogin(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault()
     try {
-      const data = await FazerLogin(email, senha)
+      await FazerLogin(email, senha)
+ 
       navigate("/register")
-      console.log(data)
     } catch (error) {
       console.error("Erro no login:", error);
       throw error;

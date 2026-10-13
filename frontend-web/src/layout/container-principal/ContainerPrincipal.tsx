@@ -4,7 +4,7 @@ import type { ReactNode } from "react"
 function ContainerPrincipal({ children, className }: { children: ReactNode, className?: string }) {
     return (
 
-        <div className={`flex  bg-[#111111] min-h-[100vh]  ${className ?? ""}`}>
+        <div className={`flex min-h-screen flex-col bg-[#111111] md:flex-row ${className ?? ""}`}>
           
             {children}
         </div>
