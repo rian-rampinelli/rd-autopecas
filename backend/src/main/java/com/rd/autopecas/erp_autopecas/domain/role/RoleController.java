@@ -21,7 +21,7 @@ public class RoleController {
     }
 
     @GetMapping
-    public ResponseEntity<List<RoleResponse>> findByid(){
+    public ResponseEntity<List<RoleResponse>> findAll(){
         return ResponseEntity.ok(roleService.findAll());
     }
 

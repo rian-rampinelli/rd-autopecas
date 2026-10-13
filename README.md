@@ -17,10 +17,12 @@ Sistema ERP Full Stack para gerenciamento de uma loja de autopeças, desenvolvid
 ### Banco de Dados
 - PostgreSQL
 
-### Frontend
-- React Native 
-- Expo
-- Js
+### Frontend Web
+- React 
+- Vite
+- TypeScript
+- React Router, React Icons, React Lucide
+- Shad Cn
 
 ## Documentação da API
 
