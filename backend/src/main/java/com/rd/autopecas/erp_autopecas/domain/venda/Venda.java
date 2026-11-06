@@ -40,7 +40,7 @@ public class Venda extends Auditable {
     private Cliente cliente;
 
     @ManyToOne
-    @JoinColumn(name = "id_funcionario",nullable = false)
+    @JoinColumn(name = "id_funcionario")
     private Funcionario funcionario;
 
     @ManyToOne
